@@ -64,9 +64,9 @@ def generate_square(dictionary):
                     raise SearchError(f'unused: {index}, retry')
             break
         except SearchError as e:
-            print(e)
+            # print(e)
             continue
-    print(base, base_solve)
+    # print(base, base_solve)
     base_square = Square(base)
     words_info = solve(dictionary, base_square, True)
     return {

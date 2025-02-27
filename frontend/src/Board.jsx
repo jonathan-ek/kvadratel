@@ -15,6 +15,7 @@ const Board = ({square, words, wordsInfo, size}) => {
     const [currentWord, setCurrentWord] = useState("-");
     const [defaultStyle, setDefaultStyle] = useState(generateArray(size, size));
     const [currentTile, setCurrentTile] = useState(null);
+    const [showFoundWords, setShowFoundWords] = useState(false);
 
     const foundWords = JSON.parse(localStorage.getItem("foundWords") || "[]");
     const [points, setPoints] = useState(foundWords.reduce((a, b) => a + b.length, 0));
@@ -35,11 +36,15 @@ const Board = ({square, words, wordsInfo, size}) => {
     }, [size]);
 
     const {cellFreq, startFreq} = useMemo(() =>
-        initializeFrequencies(wordsInfo, foundWords), [wordsInfo, foundWords, initializeFrequencies]);
+        initializeFrequencies(wordsInfo, foundWords), [wordsInfo, foundWords, initializeFrequencies, board]);
 
     const [cellFrequencies, setCellFrequencies] = useState(cellFreq);
     const [startFrequencies, setStartFrequencies] = useState(startFreq);
-
+    useEffect(() => {
+        setPoints(0); // Reset points when the square changes
+        updateFrequencies(foundWords);
+        setCurrentWord("-");
+    }, [square]);
     const setDefaultStyleAt = (rowIndex, colIndex, value) => {
         setDefaultStyle(prev =>
             prev.map((row, rIndex) =>
@@ -141,6 +146,30 @@ const Board = ({square, words, wordsInfo, size}) => {
         }
     };
 
+    const groupWordsByLength = (wordList) => {
+        return wordList.reduce((acc, word) => {
+            const length = word.length;
+            if (!acc[length]) {
+                acc[length] = [];
+            }
+            acc[length].push(word);
+            return acc;
+        }, {});
+    };
+
+    const countWordsLeft = (allWords, foundWords) => {
+        const groupedAllWords = groupWordsByLength(allWords);
+        const groupedFoundWords = groupWordsByLength(foundWords);
+        return Object.keys(groupedAllWords).reduce((acc, length) => {
+            const total = groupedAllWords[length].length;
+            const found = groupedFoundWords[length] ? groupedFoundWords[length].length : 0;
+            acc[length] = total - found;
+            return acc;
+        }, {});
+    };
+    const groupedFoundWords = groupWordsByLength(foundWords);
+    const groupedWords = groupWordsByLength(words);
+    const wordsLeftCount = countWordsLeft(words, foundWords);
     const renderPath = () => {
         if (selectedPath.length <= 1) return null;
         const mul = 130, xadd = 58, yadd = 63, color = "#192843", width = 20;
@@ -170,11 +199,14 @@ const Board = ({square, words, wordsInfo, size}) => {
     return (
         <div style={{alignItems: "center", justifyContent: "center"}}>
             <div style={{display: "grid", justifyContent: "center", alignItems: "center", columnGap: 50}}>
-                <button style={{
+                <button
+                    style={{
                     gridColumn: 1,
                     gridRow: 1,
-                }} className="text-button" onClick={() => {
-                }}>
+                }}
+                    className="text-button"
+                        onClick={() => setShowFoundWords(!showFoundWords)}
+                >
                     {foundWords.length} / {words.length} Ord
                 </button>
                 <div style={{
@@ -190,6 +222,18 @@ const Board = ({square, words, wordsInfo, size}) => {
                     </h1>
                 </div>
             </div>
+            {showFoundWords && (
+                <div className="found-words-list">
+                    {Object.keys(groupedWords).map(length => (
+                        <div key={length}>
+                            <h3>Length {length} ({wordsLeftCount[length] ?? 0} left)</h3>
+                            {(groupedFoundWords[length] || []).map((word, index) => (
+                                    <span key={index}>{word},&nbsp;</span>
+                                ))}
+                        </div>
+                    ))}
+                </div>
+            )}
             <div className="score-wrapper">
                 <h1 className={isAnimating === 'incorrect' ? "shaking-fade" : ""}>{currentWord}</h1>
             </div>
