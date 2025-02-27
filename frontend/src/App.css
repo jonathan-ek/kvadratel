@@ -1,0 +1,112 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overscroll-behaviour-y: none;
+  overflow: hidden;
+}
+
+.game {
+  display: flex;
+  column-gap: 20px;
+  row-gap: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile {
+  width: 80px;
+  height: 60px;
+  text-align: center;
+  border: 1px #222c45 solid;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  border-radius: 2px;
+  padding: 26px 15px;
+  background-color: #3e4c68;
+  font-size: large;
+  user-select: none;
+}
+
+.tile:hover {
+  transform: scale(1.02);
+  transition-duration: 80ms;
+}
+
+.score-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.score {
+  font-size: 3rem;
+}
+
+.old-score {
+  z-index: 1;
+  /* Keeps the old score visible */
+}
+
+.animated-score {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.correct-animation {
+  animation: correctAnimation 0.7s ease-out ;
+}
+
+@keyframes correctAnimation {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    color: #00ff00;
+  }
+
+
+  100% {
+    transform: scale(2);
+    opacity: 0.01;
+    color: #00ff00;
+  }
+
+}
+
+
+@keyframes fadeAndShake {
+  0% {
+    color: #fafafa;
+    transform: translate(0, 0);
+  }
+
+  25% {
+    transform: translate(-10px, 10px);
+  }
+
+  50% {
+    transform: translate(10px, -10px);
+  }
+
+  75% {
+    transform: translate(-10px, -10px);
+  }
+
+  100% {
+    color: rgb(255, 200, 200);
+    transform: translate(0, 0);
+  }
+}
+
+.shaking-fade {
+  animation: fadeAndShake 0.4s ease-in-out forwards;
+}

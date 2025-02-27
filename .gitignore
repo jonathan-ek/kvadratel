@@ -1,0 +1,7 @@
+lib
+.venv
+*.pyc
+*.pyo
+*.pyd
+node_modules
+.idea
