@@ -11,6 +11,7 @@ const Board = ({square, words, wordsInfo, size}) => {
 
     const [isAnimating, setIsAnimating] = useState("none");
     const [selectedPath, setSelectedPath] = useState([]);
+    const [prevPath, setPrevPath] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const [currentWord, setCurrentWord] = useState("-");
     const [defaultStyle, setDefaultStyle] = useState(generateArray(size, size));
@@ -68,6 +69,11 @@ const Board = ({square, words, wordsInfo, size}) => {
     const onMouseMove = useCallback((rowIndex, colIndex) => {
         if (!isDragging) return;
         setSelectedPath(prevPath => {
+            if (prevPath.length === 0) {
+                setCurrentWord(prevPath.map(([r, c]) => board[r][c]).join('') + board[rowIndex][colIndex]);
+                setDefaultStyleAt(rowIndex, colIndex, false);
+                return [[rowIndex, colIndex]];
+            }
             const lastPos = prevPath[prevPath.length - 1];
             const newPos = [rowIndex, colIndex];
             const existingIndex = prevPath.findIndex(pos => JSON.stringify(pos) === JSON.stringify(newPos));
@@ -118,8 +124,9 @@ const Board = ({square, words, wordsInfo, size}) => {
     const onMouseUp = () => {
         setDefaultStyleAll(true);
         setIsDragging(false);
-        setSelectedPath([]);
         const selectedWord = selectedPath.map(([r, c]) => board[r][c]).join('');
+        setPrevPath([...selectedPath]);
+        setSelectedPath([]);
         if (wordIsValid(selectedWord)) {
             if (foundWords.includes(selectedWord)) {
                 setCurrentWord("Redan hittat.");
@@ -197,15 +204,21 @@ const Board = ({square, words, wordsInfo, size}) => {
     };
 
     return (
-        <div style={{alignItems: "center", justifyContent: "center"}}>
-            <div style={{display: "grid", justifyContent: "center", alignItems: "center", columnGap: 50}}>
+        <div style={{alignItems: "center", justifyContent: "center", maxWidth: "100vw",}}>
+            <div style={{
+                display: "grid",
+                justifyContent: "center",
+                alignItems: "center",
+                columnGap: 50,
+                maxWidth: "100vw"
+            }}>
                 <button
                     style={{
-                    gridColumn: 1,
-                    gridRow: 1,
-                }}
+                        gridColumn: 1,
+                        gridRow: 1,
+                    }}
                     className="text-button"
-                        onClick={() => setShowFoundWords(!showFoundWords)}
+                    onClick={() => setShowFoundWords(!showFoundWords)}
                 >
                     {foundWords.length} / {words.length} Ord
                 </button>
@@ -223,13 +236,19 @@ const Board = ({square, words, wordsInfo, size}) => {
                 </div>
             </div>
             {showFoundWords && (
-                <div className="found-words-list">
+                <div className="found-words-list" style={{
+                    maxWidth: "100vw",
+                }}>
                     {Object.keys(groupedWords).map(length => (
-                        <div key={length}>
+                        <div key={length} style={{
+                            maxWidth: "100vw",
+                        }}>
                             <h3>Length {length} ({wordsLeftCount[length] ?? 0} left)</h3>
-                            {(groupedFoundWords[length] || []).map((word, index) => (
-                                    <span key={index}>{word},&nbsp;</span>
-                                ))}
+                            <div style={{
+                                maxWidth: "100vw",
+                            }}>
+                                {(groupedFoundWords[length] || []).map((word) => word).join(', ')}
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -237,7 +256,7 @@ const Board = ({square, words, wordsInfo, size}) => {
             <div className="score-wrapper">
                 <h1 className={isAnimating === 'incorrect' ? "shaking-fade" : ""}>{currentWord}</h1>
             </div>
-            <div style={{position: "relative", margin: "10px 95px"}}>
+            <div style={{position: "relative", margin: "10px 0px"}}>
                 <svg
                     style={{
                         position: "absolute",
@@ -281,6 +300,8 @@ const Board = ({square, words, wordsInfo, size}) => {
                                 defaultStyle={defaultStyle[rowIndex][colIndex]}
                                 cellFrequency={cellFrequencies[rowIndex][colIndex]}
                                 startFrequency={startFrequencies[rowIndex][colIndex]}
+                                showStartFrequency={foundWords.length / words.length > 0.4}
+                                correctAnimation={isAnimating === 'correct' && prevPath.some(([r, c]) => r === rowIndex && c === colIndex)}
                             >
                                 {char}
                             </Tile>

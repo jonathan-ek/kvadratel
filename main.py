@@ -12,7 +12,7 @@ dictionary = Dictionary(lang)
 
 def main():
     games = []
-    for _ in range(100):
+    for _ in range(10):
         res = generate_square(dictionary)
         res['wordsInfo'] = res['words_info']
         del res['words_info']

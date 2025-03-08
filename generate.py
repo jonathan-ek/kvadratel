@@ -13,7 +13,7 @@ def random_letter(dictionary):
 def generate_square(dictionary):
     size = 4
     min_words = 30
-    max_words = 120
+    max_words = 60
     min_longest = 7
     base = ''
     base_solve = {}
