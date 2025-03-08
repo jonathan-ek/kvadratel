@@ -15,7 +15,15 @@ function ClearState() {
 }
 function App() {
     const [selectedIndex, setSelectedIndex] = useState(localStorage.getItem('selectedIndex') || 0);
-
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('reset')) {
+        localStorage.setItem('selectedIndex', 0);
+        localStorage.setItem('foundWords', JSON.stringify([]));
+        // remove the query string
+        window.history.replaceState({}, document.title, window.location.pathname);
+        // reload the page to clear the query string
+        window.location.reload();
+    }
     const handleIndexChange = (index) => {
         if (index >= 0 && index < games.length) {
             setSelectedIndex(index);
